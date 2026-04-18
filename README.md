@@ -43,28 +43,60 @@ No manual JSON editing. No hunting for entrypoints. Just run and go.
 
 ## Installation
 
+**Linux / macOS:**
 ```bash
-# 1. Clone this repo
+git clone https://github.com/YOUR_USERNAME/claude-plugin-installer.git
+cd claude-plugin-installer
+chmod +x install_claude_plugins.sh
+./install_claude_plugins.sh
+```
+
+**Windows (PowerShell):**
+```powershell
 git clone https://github.com/YOUR_USERNAME/claude-plugin-installer.git
 cd claude-plugin-installer
 
-# 2. Make executable
-chmod +x install_claude_plugins.sh
+# Allow script execution (one-time, if not already set)
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 
-# 3. Run
-./install_claude_plugins.sh
+.\install_claude_plugins.ps1
+```
+
+**Windows (Git Bash / WSL):**
+```bash
+./install_claude_plugins.sh   # same as Linux
 ```
 
 ---
 
 ## Usage
 
+**Linux / macOS:**
 ```bash
 # Install all plugins globally
 ./install_claude_plugins.sh
 
 # Install + scope superpowers to a specific project
 ./install_claude_plugins.sh /path/to/your/project
+```
+
+**Windows (PowerShell):**
+```powershell
+# Install all plugins globally
+.\install_claude_plugins.ps1
+
+# Install + scope superpowers to a specific project
+.\install_claude_plugins.ps1 C:\path\to\your\project
+```
+
+**Custom install directory (all platforms):**
+```bash
+# Linux/macOS
+CLAUDE_PLUGIN_DIR=/custom/path ./install_claude_plugins.sh
+
+# Windows PowerShell
+$env:CLAUDE_PLUGIN_DIR = "D:\claude-plugins"
+.\install_claude_plugins.ps1
 ```
 
 ### Example output
@@ -129,6 +161,21 @@ Then open Claude Code in your project and type `/help` — all registered slash 
 
 ## Troubleshooting
 
+**Windows: script execution blocked**
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+```
+
+**Windows: mklink requires admin (skill linking)**  
+The script uses directory junctions (`mklink /J`) which don't need admin rights on most Windows setups. If it fails, run PowerShell as Administrator once.
+
+**Windows: `python` not found but Python is installed**  
+Windows sometimes installs Python as `python3`. Edit line 20 of the `.ps1` file:
+```powershell
+$HasPy = Has-Command "python3"
+# and update the runner line further down to "python3"
+```
+
 **Node version too old**
 ```bash
 # Install nvm then upgrade
@@ -168,7 +215,8 @@ CLAUDE_PLUGIN_DIR=/custom/path ./install_claude_plugins.sh
 ```
 
 ### Add your own plugin
-Edit the `PLUGINS` array in the script:
+
+**Linux/macOS** — edit the `PLUGINS` array in `install_claude_plugins.sh`:
 ```bash
 declare -a PLUGINS=(
   "gstack|https://github.com/garrytan/gstack|auto|global"
@@ -178,9 +226,15 @@ declare -a PLUGINS=(
 )
 ```
 
-Format: `"name | github_url | type | scope"`
-- **type**: `auto`, `node`, or `python`
-- **scope**: `global` (all projects) or `project` (scoped directory only)
+**Windows** — edit the `$Plugins` array in `install_claude_plugins.ps1`:
+```powershell
+$Plugins = @(
+    @{ name="gstack";      repo="https://github.com/garrytan/gstack";    type="auto";   scope="global"  },
+    @{ name="myplugin";    repo="https://github.com/you/myplugin";        type="auto";   scope="global"  }  # ← add here
+)
+```
+
+Format fields: `name` | `repo` (GitHub URL) | `type` (`auto`/`node`/`python`) | `scope` (`global`/`project`)
 
 ---
 
@@ -201,11 +255,12 @@ If a plugin already has its own `CLAUDE.md`, the script skips generation and lea
 
 ## Platform Support
 
-| Platform | Status |
-|----------|--------|
-| Linux | ✅ Tested |
-| macOS | ✅ Supported |
-| Windows (Git Bash / WSL) | ⚠️ Should work, not fully tested |
+| Platform | Script | Status |
+|----------|--------|--------|
+| Linux | `install_claude_plugins.sh` | ✅ Tested |
+| macOS | `install_claude_plugins.sh` | ✅ Supported |
+| Windows (native) | `install_claude_plugins.ps1` | ✅ Supported |
+| Windows (Git Bash / WSL) | `install_claude_plugins.sh` | ✅ Works too |
 
 ---
 
